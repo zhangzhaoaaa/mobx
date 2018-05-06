@@ -1,5 +1,17 @@
 const mobx = require("../../src/mobx")
-const { keys, when, set, remove, values, reaction, observable, extendObservable, has, get } = mobx
+const {
+    entries,
+    keys,
+    when,
+    set,
+    remove,
+    values,
+    reaction,
+    observable,
+    extendObservable,
+    has,
+    get
+} = mobx
 
 test("keys should be observable when extending", () => {
     const todos = observable({})
@@ -143,6 +155,46 @@ test("array - set, remove, values are reactive", () => {
         [2, 3, 4],
         [3, 4]
     ])
+})
+
+test("object - set, remove, entries are reactive", () => {
+    const todos = observable({ a: 3 })
+    const snapshots = []
+
+    reaction(() => entries(todos), entries => snapshots.push(entries))
+
+    expect(has(todos, "x")).toBe(false)
+    expect(get(todos, "x")).toBe(undefined)
+    set(todos, "x", 3)
+    expect(has(todos, "x")).toBe(true)
+    expect(get(todos, "x")).toBe(3)
+    remove(todos, "y")
+    set(todos, "z", 4)
+    set(todos, "x", 5)
+    remove(todos, "z")
+    remove(todos, "a")
+
+    expect(snapshots).toEqual([
+        [["a", 3], ["x", 3]],
+        [["a", 3], ["x", 3], ["z", 4]],
+        [["a", 3], ["x", 5], ["z", 4]],
+        [["a", 3], ["x", 5]],
+        [["x", 5]]
+    ])
+})
+
+test("map - set, remove, entries are reactive", () => {
+    const todos = observable({})
+    const snapshots = []
+
+    reaction(() => entries(todos), values => snapshots.push(values))
+})
+
+test("array - set, remove, entries are reactive", () => {
+    const todos = observable({})
+    const snapshots = []
+
+    reaction(() => entries(todos), values => snapshots.push(values))
 })
 
 test("observe & intercept", () => {

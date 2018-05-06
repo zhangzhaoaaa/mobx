@@ -1,4 +1,4 @@
-import { isObservableMap, ObservableMap } from "../types/observablemap"
+import { isObservableMap, ObservableMap, IMapEntries, IMapEntry } from "../types/observablemap"
 import {
     isObservableObject,
     IIsObservableObject,
@@ -42,6 +42,24 @@ export function values(obj: any): string[] {
     return fail(
         process.env.NODE_ENV !== "production" &&
             "'values()' can only be used on observable objects, arrays and maps"
+    )
+}
+
+export function entries<K, T>(map: ObservableMap<K, T>): IMapEntries<K, T>
+export function entries<T>(ar: IObservableArray<T>): IMapEntries<string, T>
+export function entries(obj: any): IMapEntries<string, any> {
+    if (isObservableObject(obj)) {
+        return keys(obj).map<IMapEntry<string, any>>(key => [key, obj[key]])
+    }
+    if (isObservableMap(obj)) {
+        return keys(obj).map<IMapEntry>(key => [key, obj.get(key)])
+    }
+    if (isObservableArray(obj)) {
+        return obj.slice().map<IMapEntry>((value, index) => [index, value])
+    }
+    return fail(
+        process.env.NODE_ENV !== "production" &&
+            "'entries()' can only be used on observable objects, arrays and maps"
     )
 }
 
