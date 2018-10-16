@@ -137,12 +137,16 @@ export function reportObserved(observable: IObservable): boolean {
     if (derivation !== null) {
         /**
          * Simple optimization, give each derivation run an unique id (runId)
+         * 简单优化，给每一个派生一个唯一的id(runid)
          * Check if last time this observable was accessed the same runId is used
+         * 检查上次访问此可观测值时是否使用了相同的runId
          * if this is the case, the relation is already known
+         * 如果是这样的话，这种关系就已经知道了
          */
         if (derivation.runId !== observable.lastAccessedBy) {
             observable.lastAccessedBy = derivation.runId
             // Tried storing newObserving, or observing, or both as Set, but performance didn't come close...
+            // 尝试保存newObserving或者observing，或者两者都保存，但是性能没有接近
             derivation.newObserving![derivation.unboundDepsCount++] = observable
             if (!observable.isBeingObserved) {
                 observable.isBeingObserved = true
@@ -172,19 +176,26 @@ export function reportObserved(observable: IObservable): boolean {
 
 /**
  * NOTE: current propagation mechanism will in case of self reruning autoruns behave unexpectedly
+ * 注意：在自重新运行的情况下，当前传播机制会发生意外地行为
  * It will propagate changes to observers from previous run
+ * 会从之前的运行中传播变化到observers中
  * It's hard or maybe impossible (with reasonable perf) to get it right with current approach
+ * 现行的办法很难或者不太可能使其正确处理
  * Hopefully self reruning autoruns aren't a feature people should depend on
+ * 希望自重新运行不是一个人们依赖的feature
  * Also most basic use cases should be ok
+ * 大多数基本用例还是可以满足的
  */
 
 // Called by Atom when its value changes
+// 当值发生变化的时候，方法会被Atom调用
 export function propagateChanged(observable: IObservable) {
     // invariantLOS(observable, "changed start");
     if (observable.lowestObserverState === IDerivationState.STALE) return
     observable.lowestObserverState = IDerivationState.STALE
 
     // Ideally we use for..of here, but the downcompiled version is really slow...
+    // 理论上说我这里可以用for..of，但是降编译版是真的慢
     observable.observers.forEach(d => {
         if (d.dependenciesState === IDerivationState.UP_TO_DATE) {
             if (d.isTracing !== TraceMode.NONE) {
@@ -198,6 +209,7 @@ export function propagateChanged(observable: IObservable) {
 }
 
 // Called by ComputedValue when it recalculate and its value changed
+// 当被重新计算和它的值改变的时候，会被ComputedValue调用
 export function propagateChangeConfirmed(observable: IObservable) {
     // invariantLOS(observable, "confirmed start");
     if (observable.lowestObserverState === IDerivationState.STALE) return
@@ -215,6 +227,7 @@ export function propagateChangeConfirmed(observable: IObservable) {
 }
 
 // Used by computed when its dependency changed, but we don't wan't to immediately recompute.
+// 当依赖改变的时候，会被computed调用，但是我们不想立即重新计算
 export function propagateMaybeChanged(observable: IObservable) {
     // invariantLOS(observable, "maybe start");
     if (observable.lowestObserverState !== IDerivationState.UP_TO_DATE) return

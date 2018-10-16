@@ -23,14 +23,19 @@ import {
 
 /**
  * Reactions are a special kind of derivations. Several things distinguishes them from normal reactive computations
- *
+ * Reactions是一种特别的派生。有几个特点让它与普通响应式计算有所区别
  * 1) They will always run, whether they are used by other computations or not.
+ * 它们总是运行，无论是否被其他的computations调用
  * This means that they are very suitable for triggering side effects like logging, updating the DOM and making network requests.
+ * 这意味它们很适合触发副作用，像打印日志，更新DOM和发送网络请求
  * 2) They are not observable themselves
+ * 它们本身不是observable
  * 3) They will always run after any 'normal' derivations
+ * 在任何标准的派生之后，它们都会运行
  * 4) They are allowed to change the state and thereby triggering themselves again, as long as they make sure the state propagates to a stable state in a reasonable amount of iterations.
- *
+ * 只要它们确保状态以合理的迭代量传播到稳定的状态，它们就可以改变状态，从而再次触发自己。
  * The state machine of a Reaction is as follows:
+ * Reaction状态机如下：
  *
  * 1) after creating, the reaction should be started by calling `runReaction` or by scheduling it (see also `autorun`)
  * 2) the `onInvalidate` handler should somehow result in a call to `this.track(someFunction)`
