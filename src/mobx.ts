@@ -2,21 +2,21 @@
  * (c) Michel Weststrate 2015 - 2018
  * MIT Licensed
  *
- * Welcome to the mobx sources! To get an global overview of how MobX internally works,
- * this is a good place to start:
+ * 欢迎光临mobx的源码！想要了解Mobx的内部工作机制，这篇文章是个好的开始:
  * https://medium.com/@mweststrate/becoming-fully-reactive-an-in-depth-explanation-of-mobservable-55995262a254#.xvbh6qd74
  *
- * Source folders:
+ * 源码文件夹:
  * ===============
  *
- * - api/     Most of the public static methods exposed by the module can be found here.
- * - core/    Implementation of the MobX algorithm; atoms, derivations, reactions, dependency trees, optimizations. Cool stuff can be found here.
- * - types/   All the magic that is need to have observable objects, arrays and values is in this folder. Including the modifiers like `asFlat`.
- * - utils/   Utility stuff.
+ * - api/     模块暴露的大多数公共的静态方法能在这里找到
+ * - core/    Mobx 算法的实现;atoms（原子），derivation（派生），reactions（响应），dependency tree（依赖树）, optimizations（优化）.很酷的东西可以在这里找到。
+ * - types/   需要可观察的对象、数组和值的数据类型都在这个文件夹下。包含像'asFlat'这样的修改器
+ * - utils/   工具.
  *
  */
 
 if (typeof Proxy === "undefined" || typeof Symbol === "undefined") {
+    // 使用Mobx 5+需要Proxy和Symbol对象的支持。如果你的环境不支持Proxy对象，请降级到Mobx 4.使用React Native Android的用户，考虑升级一下JSCore.
     throw new Error(
         "[mobx] MobX 5+ requires Proxy and Symbol objects. If your environment doesn't support Proxy objects, please downgrade to MobX 4. For React Native Android, consider upgrading JSCore."
     )
@@ -24,7 +24,7 @@ if (typeof Proxy === "undefined" || typeof Symbol === "undefined") {
 
 declare var window: any
 try {
-    // define process.env if needed
+    // 定义process.env
     // if this is not a production build in the first place
     // (in which case the expression below would be substituted with 'production')
     process.env.NODE_ENV

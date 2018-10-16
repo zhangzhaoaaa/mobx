@@ -17,15 +17,14 @@ export interface IDepTreeNode {
 export interface IObservable extends IDepTreeNode {
     diffValue: number
     /**
-     * Id of the derivation *run* that last accessed this observable.
-     * If this id equals the *run* id of the current derivation,
-     * the dependency is already established
+     * 上次访问此可观察到的派生运行的ID
+     * 如果这个ID等于当前派生的运行ID，说明依赖已经建立了
      */
     lastAccessedBy: number
     isBeingObserved: boolean
 
-    lowestObserverState: IDerivationState // Used to avoid redundant propagations
-    isPendingUnobservation: boolean // Used to push itself to global.pendingUnobservations at most once per batch.
+    lowestObserverState: IDerivationState // 避免多余的传播
+    isPendingUnobservation: boolean // 把自己push到global.pendingUnobservations中，每批最多一次
 
     observers: Set<IDerivation>
 
@@ -94,8 +93,11 @@ export function queueForUnobservation(observable: IObservable) {
 
 /**
  * Batch starts a transaction, at least for purposes of memoizing ComputedValues when nothing else does.
+ * 批处理启动事务，至少在没有其他操作的情况下，用于回溯计算值(ComputedValue)
  * During a batch `onBecomeUnobserved` will be called at most once per observable.
+ * 在一次批处理中，onBecomeUnobserved方法在每一次可观察到的值的时候，最多会被调用一次
  * Avoids unnecessary recalculations.
+ * 避免没必要的重新计算
  */
 export function startBatch() {
     globalState.inBatch++
@@ -105,6 +107,7 @@ export function endBatch() {
     if (--globalState.inBatch === 0) {
         runReactions()
         // the batch is actually about to finish, all unobserving should happen here.
+        // 批处理实际上将要结束，所有的unobserving应该在这里出现
         const list = globalState.pendingUnobservations
         for (let i = 0; i < list.length; i++) {
             const observable = list[i]
@@ -112,12 +115,15 @@ export function endBatch() {
             if (observable.observers.size === 0) {
                 if (observable.isBeingObserved) {
                     // if this observable had reactive observers, trigger the hooks
+                    // 如果这个可观察的对象有observers，触发hooks
                     observable.isBeingObserved = false
                     observable.onBecomeUnobserved()
                 }
                 if (observable instanceof ComputedValue) {
                     // computed values are automatically teared down when the last observer leaves
+                    // 当最后一个observer离开的时候，computed values会自动地拆解
                     // this process happens recursively, this computed might be the last observabe of another, etc..
+                    // 这个过程会递归出现，这个computed可能是另一个的最后一个observable
                     observable.suspend()
                 }
             }
